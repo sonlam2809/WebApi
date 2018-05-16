@@ -32,11 +32,14 @@ namespace BookWebAPI.Models
         public System.DateTime CreateDay { get; set; }
         public System.DateTime ModifiedDay { get; set; }
         public bool IsActive { get; set; }
+        public int BookStatusID { get; set; }
     
         public virtual Author Author { get; set; }
         public virtual Category Category { get; set; }
         public virtual Publisher Publisher { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Comment> Comments { get; set; }
+        public virtual StatusBook StatusBook { get; set; }
+        public virtual StatusBook StatusBook1 { get; set; }
     }
 }

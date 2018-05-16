@@ -16,6 +16,9 @@
         <AssociationConnector Association="BooksLModel.FK_Book_Category" ManuallyRouted="false" />
         <AssociationConnector Association="BooksLModel.FK_Book_Publisher" ManuallyRouted="false" />
         <AssociationConnector Association="BooksLModel.FK_Comment_Book" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="BooksLModel.StatusBook" Width="1.5" PointX="0.75" PointY="10.875" />
+        <AssociationConnector Association="BooksLModel.FK__Book__BookStatus__30F848ED" />
+        <AssociationConnector Association="BooksLModel.FK__Book__BookStatus__31EC6D26" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -10,45 +10,48 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using BookWebAPI.Models;
 using System.Web.Http.Cors;
-using System.Web;
-using Newtonsoft.Json;
 
 namespace BookWebAPI.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
-    public class CategoriesController : ApiController
+    public class PublishersController : ApiController
     {
         private BooksLEntities db = new BooksLEntities();
 
-        // GET: api/Categories
-        public IQueryable<Category> GetCategories()
+        // GET: api/Publishers
+        public IQueryable<Publisher> GetPublishers()
         {
-            return db.Categories;
+            return db.Publishers;
         }
 
-        // GET: api/Categories/5
-        [ResponseType(typeof(Category))]
-        public IHttpActionResult GetCategory(int id)
+        // GET: api/Publishers/5
+        [ResponseType(typeof(Publisher))]
+        public IHttpActionResult GetPublisher(int id)
         {
-            Category category = db.Categories.Find(id);
-            if (category == null)
+            Publisher publisher = db.Publishers.Find(id);
+            if (publisher == null)
             {
                 return NotFound();
             }
 
-            return Ok(category);
+            return Ok(publisher);
         }
 
-        // PUT: api/Categories/5
+        // PUT: api/Publishers/5
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutCategory(int id, [FromBody] Category category)
+        public IHttpActionResult PutPublisher(int id, Publisher publisher)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Entry(category).State = EntityState.Modified;
+            if (id != publisher.PubID)
+            {
+                return BadRequest();
+            }
+
+            db.Entry(publisher).State = EntityState.Modified;
 
             try
             {
@@ -56,7 +59,7 @@ namespace BookWebAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CategoryExists(id))
+                if (!PublisherExists(id))
                 {
                     return NotFound();
                 }
@@ -69,35 +72,35 @@ namespace BookWebAPI.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Categories
-        [ResponseType(typeof(Category))]
-        public IHttpActionResult PostCategory(Category category)
+        // POST: api/Publishers
+        [ResponseType(typeof(Publisher))]
+        public IHttpActionResult PostPublisher(Publisher publisher)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Categories.Add(category);
+            db.Publishers.Add(publisher);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = category.CateID }, category);
+            return CreatedAtRoute("DefaultApi", new { id = publisher.PubID }, publisher);
         }
 
-        // DELETE: api/Categories/5
-        [ResponseType(typeof(Category))]
-        public IHttpActionResult DeleteCategory(int id)
+        // DELETE: api/Publishers/5
+        [ResponseType(typeof(Publisher))]
+        public IHttpActionResult DeletePublisher(int id)
         {
-            Category category = db.Categories.Find(id);
-            if (category == null)
+            Publisher publisher = db.Publishers.Find(id);
+            if (publisher == null)
             {
                 return NotFound();
             }
 
-            db.Categories.Remove(category);
+            db.Publishers.Remove(publisher);
             db.SaveChanges();
 
-            return Ok(category);
+            return Ok(publisher);
         }
 
         protected override void Dispose(bool disposing)
@@ -109,21 +112,15 @@ namespace BookWebAPI.Controllers
             base.Dispose(disposing);
         }
 
-        private bool CategoryExists(int id)
+        private bool PublisherExists(int id)
         {
-            return db.Categories.Count(e => e.CateID == id) > 0;
+            return db.Publishers.Count(e => e.PubID == id) > 0;
         }
 
-        /// <summary>
-        /// get categories by page and size
-        /// </summary>
-        /// <param name="currentPage"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
         [HttpGet]
         //[Route("api/Categories/{currentPage}/{pageSize}/{lookfor}")]
         /// GET: api/Categories/1/10
-        public IHttpActionResult PagingCategory(int currentPage, int pageSize, string lookfor)
+        public IHttpActionResult PagingPublisher(int currentPage, int pageSize, string lookfor)
         {
             object pageInfo = null;
             int skip = (currentPage - 1) * pageSize;
@@ -132,8 +129,8 @@ namespace BookWebAPI.Controllers
                 pageInfo = new
                 {
 
-                    category = db.Categories.OrderBy(x => x.CateID).AsQueryable().Skip(skip).Take(pageSize).ToList(),
-                    total = db.Categories.Count()
+                    publisher = db.Publishers.OrderBy(x => x.PubID).AsQueryable().Skip(skip).Take(pageSize).ToList(),
+                    total = db.Publishers.Count()
                 };
             }
             else
@@ -141,28 +138,27 @@ namespace BookWebAPI.Controllers
                 pageInfo = new
                 {
 
-                    category = db.Categories.OrderBy(x => x.CateID).AsQueryable().Where(x => x.CateName.Contains(lookfor)).Skip(skip).Take(pageSize).ToList(),
-                    total = db.Categories.Count()
+                    publisher = db.Publishers.OrderBy(x => x.PubID).AsQueryable().Where(x => x.Name.Contains(lookfor)).Skip(skip).Take(pageSize).ToList(),
+                    total = db.Publishers.Count()
                 };
             }
             return Ok(pageInfo);
 
         }
-        // GET: api/Categories (Name, ID)
-        [Route("api/Categories/getID_Name")]
-        public IHttpActionResult GetCategoriesIDName()
+        // GET: api/Publishers/getID_Name (Name, ID)
+        [Route("api/Publishers/getID_Name")]
+        public IHttpActionResult GetPublishersIDName()
         {
             object obj = null;
             obj = new
             {
-                cateInfo = db.Categories.Select(x => new
+                publisherInfo = db.Publishers.Select(x => new
                 {
-                    x.CateID,
-                    x.CateName
+                    x.PubID,
+                    x.Name
                 })
-
-
             };
+
             return Ok(obj);
         }
     }

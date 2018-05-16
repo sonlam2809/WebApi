@@ -10,45 +10,44 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using BookWebAPI.Models;
 using System.Web.Http.Cors;
-using System.Web;
-using Newtonsoft.Json;
 
 namespace BookWebAPI.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
-    public class CategoriesController : ApiController
+    public class AuthorsController : ApiController
     {
         private BooksLEntities db = new BooksLEntities();
 
-        // GET: api/Categories
-        public IQueryable<Category> GetCategories()
+        // GET: api/Authors
+        public IQueryable<Author> GetAuthors()
         {
-            return db.Categories;
+            return db.Authors;
         }
 
-        // GET: api/Categories/5
-        [ResponseType(typeof(Category))]
-        public IHttpActionResult GetCategory(int id)
+        // GET: api/Authors/5
+        [ResponseType(typeof(Author))]
+        public IHttpActionResult GetAuthor(int id)
         {
-            Category category = db.Categories.Find(id);
-            if (category == null)
+            Author author = db.Authors.Find(id);
+            if (author == null)
             {
                 return NotFound();
             }
 
-            return Ok(category);
+            return Ok(author);
         }
 
-        // PUT: api/Categories/5
+        // PUT: api/Authors/5
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutCategory(int id, [FromBody] Category category)
+        public IHttpActionResult PutAuthor(int id, Author author)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Entry(category).State = EntityState.Modified;
+
+            db.Entry(author).State = EntityState.Modified;
 
             try
             {
@@ -56,7 +55,7 @@ namespace BookWebAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CategoryExists(id))
+                if (!AuthorExists(id))
                 {
                     return NotFound();
                 }
@@ -69,35 +68,35 @@ namespace BookWebAPI.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Categories
-        [ResponseType(typeof(Category))]
-        public IHttpActionResult PostCategory(Category category)
+        // POST: api/Authors
+        [ResponseType(typeof(Author))]
+        public IHttpActionResult PostAuthor(Author author)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Categories.Add(category);
+            db.Authors.Add(author);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = category.CateID }, category);
+            return CreatedAtRoute("DefaultApi", new { id = author.AuthorID }, author);
         }
 
-        // DELETE: api/Categories/5
-        [ResponseType(typeof(Category))]
-        public IHttpActionResult DeleteCategory(int id)
+        // DELETE: api/Authors/5
+        [ResponseType(typeof(Author))]
+        public IHttpActionResult DeleteAuthor(int id)
         {
-            Category category = db.Categories.Find(id);
-            if (category == null)
+            Author author = db.Authors.Find(id);
+            if (author == null)
             {
                 return NotFound();
             }
 
-            db.Categories.Remove(category);
+            db.Authors.Remove(author);
             db.SaveChanges();
 
-            return Ok(category);
+            return Ok(author);
         }
 
         protected override void Dispose(bool disposing)
@@ -109,9 +108,9 @@ namespace BookWebAPI.Controllers
             base.Dispose(disposing);
         }
 
-        private bool CategoryExists(int id)
+        private bool AuthorExists(int id)
         {
-            return db.Categories.Count(e => e.CateID == id) > 0;
+            return db.Authors.Count(e => e.AuthorID == id) > 0;
         }
 
         /// <summary>
@@ -123,7 +122,7 @@ namespace BookWebAPI.Controllers
         [HttpGet]
         //[Route("api/Categories/{currentPage}/{pageSize}/{lookfor}")]
         /// GET: api/Categories/1/10
-        public IHttpActionResult PagingCategory(int currentPage, int pageSize, string lookfor)
+        public IHttpActionResult PagingAuthor(int currentPage, int pageSize, string lookfor)
         {
             object pageInfo = null;
             int skip = (currentPage - 1) * pageSize;
@@ -132,8 +131,8 @@ namespace BookWebAPI.Controllers
                 pageInfo = new
                 {
 
-                    category = db.Categories.OrderBy(x => x.CateID).AsQueryable().Skip(skip).Take(pageSize).ToList(),
-                    total = db.Categories.Count()
+                    author = db.Authors.OrderBy(x => x.AuthorID).AsQueryable().Skip(skip).Take(pageSize).ToList(),
+                    total = db.Authors.Count()
                 };
             }
             else
@@ -141,29 +140,29 @@ namespace BookWebAPI.Controllers
                 pageInfo = new
                 {
 
-                    category = db.Categories.OrderBy(x => x.CateID).AsQueryable().Where(x => x.CateName.Contains(lookfor)).Skip(skip).Take(pageSize).ToList(),
-                    total = db.Categories.Count()
+                    category = db.Authors.OrderBy(x => x.AuthorID).AsQueryable().Where(x => x.AuthorName.Contains(lookfor)).Skip(skip).Take(pageSize).ToList(),
+                    total = db.Authors.Count()
                 };
             }
             return Ok(pageInfo);
 
         }
-        // GET: api/Categories (Name, ID)
-        [Route("api/Categories/getID_Name")]
-        public IHttpActionResult GetCategoriesIDName()
+        // GET: api/Authors (Name, ID)
+        [Route("api/Authors/getID_Name")]
+        public IHttpActionResult GetAuthorsIDName()
         {
             object obj = null;
+
             obj = new
             {
-                cateInfo = db.Categories.Select(x => new
+                authorInfo = db.Authors.Select(x => new
                 {
-                    x.CateID,
-                    x.CateName
+                    x.AuthorID,
+                    x.AuthorName
                 })
-
-
             };
+            
             return Ok(obj);
-        }
     }
+}
 }
