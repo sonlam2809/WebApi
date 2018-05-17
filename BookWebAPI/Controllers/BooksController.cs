@@ -10,6 +10,8 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using BookWebAPI.Models;
 using System.Web.Http.Cors;
+using System.Web;
+using System.IO;
 
 namespace BookWebAPI.Controllers
 {
@@ -81,6 +83,9 @@ namespace BookWebAPI.Controllers
                 return BadRequest(ModelState);
             }
 
+            book.CreateDay = DateTime.Now;
+            book.ModifiedDay = DateTime.Now;
+            book.IsActive = true;
             db.Books.Add(book);
             db.SaveChanges();
 
@@ -129,7 +134,23 @@ namespace BookWebAPI.Controllers
                 pageInfo = new
                 {
 
-                    book = db.Books.OrderBy(x => x.BookID).AsQueryable().Skip(skip).Take(pageSize).ToList(),
+                    //book = db.Books.OrderBy(x => x.BookID).AsQueryable().Skip(skip).Take(pageSize).ToList(),
+                    book = db.Books.OrderBy(x => x.BookID).AsQueryable().Select(a=>new {
+                        Title = a.Title,
+                        Price = a.Price,
+                        Quantity = a.Quantity,
+                        ImgUrl = a.ImgUrl,
+                        BookStatus = a.StatusBook.BookStatus,
+                        CateID = a.CateID,
+                        AuthorID = a.AuthorID,
+                        PublisherID = a.PubID,
+                        BookID = a.BookID,
+                        Summary = a.Summary,
+                        Category = a.Category.CateName,
+                        Author = a.Author.AuthorName,
+                        Publisher = a.Publisher.Name,
+                        Status = a.StatusBook.BookStatus
+                    }).Skip(skip).Take(pageSize).ToList(),
                     total = db.Books.Count()
                 };
             }
@@ -138,7 +159,22 @@ namespace BookWebAPI.Controllers
                 pageInfo = new
                 {
 
-                    book = db.Books.OrderBy(x => x.CateID).AsQueryable().Where(x => x.Title.Contains(lookfor)).Skip(skip).Take(pageSize).ToList(),
+                    book = db.Books.OrderBy(x => x.CateID).AsQueryable().Where(x => x.Title.Contains(lookfor)).Select(a => new {
+                        Title = a.Title,
+                        Price = a.Price,
+                        Quantity = a.Quantity,
+                        ImgUrl = a.ImgUrl,
+                        BookStatus = a.StatusBook.BookStatus,
+                        CateID = a.CateID,
+                        AuthorID = a.AuthorID,
+                        PublisherID = a.PubID,
+                        BookID = a.BookID,
+                        Summary = a.Summary,
+                        Category = a.Category.CateName,
+                        Author = a.Author.AuthorName,
+                        Publisher = a.Publisher.Name,
+                        Status = a.StatusBook.BookStatus
+                    }).Skip(skip).Take(pageSize).ToList(),
                     total = db.Books.Count()
                 };
             }
@@ -162,6 +198,21 @@ namespace BookWebAPI.Controllers
             };
             return Ok(obj);
         }
+        [HttpPost]
+        [Route("api/Books/UploadImage")]
+        public HttpResponseMessage UploadImage()
+        {
+            string imageName = null;
+            var httpRequest = HttpContext.Current.Request;
+            //Upload Image
+            var postedFile = httpRequest.Files["Image"];
+            //Create custom filename
+            imageName = new String(Path.GetFileNameWithoutExtension(postedFile.FileName).Take(10).ToArray()).Replace(" ", "-");
+            imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(postedFile.FileName);
+            var filePath = HttpContext.Current.Server.MapPath("~/Image/" + imageName);
+            postedFile.SaveAs(filePath);
 
+            return Request.CreateResponse(HttpStatusCode.Created);
+        }
     }
 }
